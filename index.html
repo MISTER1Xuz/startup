@@ -3,31 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yashil Yo'l - Sun'iy Yo'ldosh Animatsiyasi</title>
-    <!-- Leaflet CSS (Xarita uchun) -->
+    <title>Yashil Yo'l - Smart City Trassa Dispetcheri</title>
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Sizning uslublar faylingiz -->
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- HUD Boshqaruv Paneli -->
+    <!-- Professional HUD Boshqaruv Paneli -->
     <div class="hud-panel">
-        <h1>YASHIL YO'L - SATELLITE</h1>
-        <p>Toshkent Smart City GPS & Green Wave</p>
-        <div class="stat-row">Tizim: <span id="sys-status">FAOL (Satelit)</span></div>
-        <div class="stat-row">GPS Tracker: <span id="gps-status">Ulangan</span></div>
-        <button class="action-btn" id="emergencyBtn">🚨 Yashil To'lqinni Yoqish</button>
+        <h1>YASHIL YO'L <span>TRACER</span></h1>
+        <p>Toshkent Shahri Maxsus Trassa Tizimi</p>
+        
+        <div class="stat-row">Satelit Holati: <span id="sys-status">BARQAROR (4K)</span></div>
+        <div class="stat-row">Faol Transport: <span id="active-vehicle" style="color:#ff3333">103 - Tez Yordam</span></div>
+        <div class="stat-row">Svetofor Holati: <span id="light-mode" style="color:#ffcc00">TIRBANDLIK (5s qizil)</span></div>
+        <div class="stat-row">Trassa Holati: <span style="color:#00ff80">OCHIQ (GREEN WAVE)</span></div>
+
+        <button class="action-btn" id="waveBtn">🚨 Green Wave Majburiy Ochish</button>
+        
+        <!-- Terminal Loglari -->
+        <div class="terminal-box" id="terminalLog">
+            [00:01] Trassa xaritasi yuklandi...<br>
+            [00:02] Transport marshrutga chiqdi...
+        </div>
     </div>
 
-    <!-- Xarita konteyneri -->
+    <!-- Xarita -->
     <div id="map"></div>
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- GPS Tracker mantiqi -->
+    <!-- GPS Tracker & Routes -->
     <script src="gps_tracker.js"></script>
-    <!-- Asosiy dastur fayli -->
+    <!-- App Logic -->
     <script src="app.js"></script>
 </body>
 </html>
