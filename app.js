@@ -1,25 +1,51 @@
-// Xaritani tinch va silliq rejimda ochish
 const map = L.map('map', {
     zoomControl: false,
     attributionControl: false
-}).setView([41.3111, 69.2797], 14);
+}).setView([41.3111, 69.2797], 13);
 
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     maxZoom: 19
 }).addTo(map);
 
-// Transport turlari (103, 101, YPX, Kortej)
-const vehiclesData = [
-    { name: "103 - Tez Yordam", code: "103", color: "#ff3333", route: GPSTracker.route103 },
-    { name: "101 - O't O'chirish", code: "101", color: "#ff9900", route: GPSTracker.route101 },
-    { name: "YPX - Patrul", code: "YPX", color: "#3366ff", route: GPSTracker.routeYPX },
-    { name: "Kortej", code: "VIP", color: "#9933ff", route: GPSTracker.routeKortej }
+// Shahar muhim infratuzilma obyektlarini xaritaga chiqarish (Dispetcher uchun ma'lumot)
+const infrastructure = [
+    { name: "16-Shahar Kasalxonasi", type: "hospital", coords: [41.3250, 69.2500] },
+    { name: "Yong'in Xavfsizligi 1-Qism", type: "fire", coords: [41.3000, 69.2900] },
+    { name: "YPX Boshqarmasi", type: "police", coords: [41.2900, 69.2400] }
 ];
 
-let currentVehicleIdx = 0;
+infrastructure.forEach(obj => {
+    L.circleMarker(obj.coords, {
+        radius: 7,
+        color: '#38bdf8',
+        fillColor: '#0284c7',
+        fillOpacity: 0.8
+    }).addTo(map).bindPopup(`<b>🏢 Infratuzilma:</b> ${obj.name}`);
+});
+
+// Transport turlari
+const vehiclesData = [
+    { name: "103 - Tez Yordam", code: "103", color: "#ff3333" },
+    { name: "101 - O't O'chirish", code: "101", color: "#ff9900" },
+    { name: "YPX - Patrul", code: "YPX", color: "#3366ff" },
+    { name: "VIP Kortej", code: "VIP", color: "#a855f7" }
+];
+
+let selectedIncidentIdx = 0;
+let selectedVehicleIdx = 0;
+
 let activeVehicleObj = null;
 let activeLine = null;
-let isRedLight = true; // Probka qizil chiroq
+let isMoving = false;
+let isRedLight = true;
+
+// Aholi mashinalari (Probka)
+let civilianMarkers = [];
+GPSTracker.incidents.forEach(inc => {
+    let civIcon = L.divIcon({ className: 'civilian-marker', html: `🚗`, iconSize: [20, 20], iconAnchor: [10, 10] });
+    let m = L.marker(inc.coords, { icon: civIcon }).addTo(map).bindPopup(`<b>⚠️ Probka:</b> ${inc.name}`);
+    civilianMarkers.push(m);
+});
 
 const term = document.getElementById('terminalLog');
 function addLog(text) {
@@ -28,51 +54,92 @@ function addLog(text) {
     term.scrollTop = term.scrollHeight;
 }
 
-// Transportni trassaga chiqarish
-function loadVehicle(index) {
+// Dispetcher chaqiruvni tanlaydi
+window.selectIncident = function(idx) {
+    selectedIncidentIdx = idx;
+    document.querySelectorAll('.sel-btn').forEach((btn, i) => {
+        if (i === idx) btn.classList.add('active');
+        else btn.classList.remove('active');
+    });
+    addLog(`📍 Chaqiruv tanlandi: ${GPSTracker.incidents[idx].name}`);
+};
+
+// Dispetcher mashinani tanlaydi
+window.selectVehicle = function(idx) {
+    selectedVehicleIdx = idx;
+    document.querySelectorAll('.veh-btn').forEach((btn, i) => {
+        if (i === idx) btn.classList.add('active');
+        else btn.classList.remove('active');
+    });
+    addLog(`🚑 Ekipaj tanlandi: ${vehiclesData[idx].name}`);
+};
+
+// DISPETCHER "JO'NATISH" TUGMASINI BOSGANDA GINA HARAKATLANISH BOSHLANADI!
+document.getElementById('dispatchBtn').addEventListener('click', () => {
+    if (isMoving) {
+        addLog(`⚠️ OGOHLANTIRISH: Ekipaj allaqachon trassada!`);
+        return;
+    }
+
     if (activeVehicleObj) {
         map.removeLayer(activeVehicleObj.marker);
         map.removeLayer(activeLine);
     }
 
-    let v = vehiclesData[index];
-    document.getElementById('active-vehicle').innerText = v.name;
-    document.getElementById('active-vehicle').style.color = v.color;
-    addLog(`Trassaga chiqdi: ${v.name}`);
+    let v = vehiclesData[selectedVehicleIdx];
+    let routeKey = selectedIncidentIdx === 0 ? 'temur' : 'bunyodkor';
+    let route = GPSTracker.routes[routeKey];
 
-    // Trassa bo'ylab chiziq
-    activeLine = L.polyline(v.route, {
+    isRedLight = true;
+    isMoving = true;
+    document.getElementById('sys-status').innerText = `${v.name} YO'LDA`;
+    document.getElementById('light-mode').innerText = "🔴 Probka (Qizil)";
+    document.getElementById('light-mode').style.color = "#ff3333";
+    addLog(`🚀 DISPETCHER BUYRUG'I: ${v.name} -> ${GPSTracker.incidents[selectedIncidentIdx].name} tomon yo'l oldi!`);
+
+    activeLine = L.polyline(route, {
         color: v.color,
         weight: 6,
         opacity: 0.85,
-        lineCap: 'round',
-        lineJoin: 'round'
+        lineCap: 'round'
     }).addTo(map);
 
-    // Tinch va silliq marker
     let icon = L.divIcon({
         className: 'vehicle-marker',
         html: `<div style="background:${v.color}; width:100%; height:100%; border-radius:50%; display:flex; align-items:center; justify-content:center;">${v.code}</div>`,
-        iconSize: [26, 26],
-        iconAnchor: [13, 13]
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
     });
 
-    let marker = L.marker(v.route[0], { icon: icon }).addTo(map);
+    let marker = L.marker(route[0], { icon: icon }).addTo(map);
 
     activeVehicleObj = {
-        route: v.route,
+        route: route,
         marker: marker,
         step: 0,
         progress: 0,
-        waiting: false
+        paused: false
     };
-}
+});
 
-loadVehicle(0);
+// Green Wave tugmasi (Dispetcher probkani ochadi)
+document.getElementById('waveBtn').addEventListener('click', () => {
+    if (!isMoving) {
+        addLog(`ℹ️ Hozir harakatlanayotgan mashina yo'q.`);
+        return;
+    }
+    if (isRedLight) {
+        isRedLight = false;
+        if (activeVehicleObj) activeVehicleObj.paused = false;
+        document.getElementById('light-mode').innerText = "🟢 GREEN WAVE (Ochildi!)";
+        document.getElementById('light-mode').style.color = "#00ff80";
+        addLog(`⚡ GREEN WAVE YOQILDI: Svetofor yashilga o'tdi, aholi mashinalari to'xtatildi!`);
+    }
+});
 
-// Trassa bo'ylab harakatlanish va 5 sekundlik probka mantiqi
+// Harakat mantiqi (O'zidan-o'zi yurmaydi, faqat dispetcher boshqaradi)
 function animateSystem() {
-    if (activeVehicleObj) {
+    if (activeVehicleObj && isMoving) {
         let v = activeVehicleObj;
         let route = v.route;
 
@@ -80,31 +147,17 @@ function animateSystem() {
             let start = route[v.step];
             let end = route[v.step + 1];
 
-            // Chorrahada (probka) 5 soniya qizil to'xtash
-            if (v.step === 1 && isRedLight && !v.waiting) {
-                v.waiting = true;
-                document.getElementById('light-mode').innerText = "🔴 PROBKA: Qizil (5s)";
-                document.getElementById('light-mode').style.color = "#ff3333";
-                addLog(`⚠️ Trassada probka! Svetofor qizil, 5 soniya kutish...`);
-
-                let countdown = 5;
-                let timer = setInterval(() => {
-                    countdown--;
-                    document.getElementById('light-mode').innerText = `🔴 Qizil: ${countdown}s`;
-                    if (countdown <= 0) {
-                        clearInterval(timer);
-                        isRedLight = false; // Green wave ochildi!
-                        v.waiting = false;
-                        document.getElementById('light-mode').innerText = "🟢 GREEN WAVE (Ochildi!)";
-                        document.getElementById('light-mode').style.color = "#00ff80";
-                        addLog(`🟢 Green Wave ochildi! Trassa bo'ylab tez harakat boshlandi.`);
-                    }
-                }, 1000);
+            // Probka nuqtasiga kelganda to'xtash
+            if (v.step === 1 && isRedLight && !v.paused) {
+                v.paused = true;
+                addLog(`⚠️ PROBKA: Mashina tirbandlikka yetib keldi. Dispetcher "Green Wave" ni kutmoqda...`);
             }
 
-            if (!v.waiting) {
-                // Yashil bo'lganda tezlik oshadi (manzilga tezroq borish uchun)
-                let speedFactor = isRedLight ? 0.006 : 0.02; 
+            if (!v.paused) {
+                let speed = isRedLight ? 15 : 100;
+                document.getElementById('speed-indicator').innerText = speed + " km/h";
+
+                let speedFactor = isRedLight ? 0.002 : 0.022;
                 v.progress += speedFactor;
 
                 let lat = start[0] + (end[0] - start[0]) * v.progress;
@@ -119,25 +172,15 @@ function animateSystem() {
                 }
             }
         } else {
-            addLog(`✅ Manzilga muvaffaqiyatli yetib borildi!`);
-            isRedLight = true; // Qaytadan qizil holatga qaytarish
-            currentVehicleIdx = (currentVehicleIdx + 1) % vehiclesData.length;
-            setTimeout(() => {
-                loadVehicle(currentVehicleIdx);
-            }, 2000);
+            document.getElementById('speed-indicator').innerText = "0 km/h";
+            document.getElementById('sys-status').innerText = "MANZILGA YETDI";
+            document.getElementById('light-mode').innerText = "🟢 YAKUNLANDI";
+            addLog(`✅ XABAR: Ekipaj chaqiruv manziliga muvaffaqiyatli yetib keldi!`);
+            isMoving = false;
         }
     }
 
     requestAnimationFrame(animateSystem);
 }
 
-// Majburiy Green Wave tugmasi
-document.getElementById('waveBtn').addEventListener('click', () => {
-    isRedLight = false;
-    document.getElementById('light-mode').innerText = "⚡ MAJBURIY OCHILDI";
-    document.getElementById('light-mode').style.color = "#00ff80";
-    addLog(`🚨 Dispetcher trassani majburiy ochdi!`);
-});
-
-// Ishga tushirish
-setTimeout(animateSystem, 1000);
+requestAnimationFrame(animateSystem);

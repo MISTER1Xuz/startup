@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yashil Yo'l - Smart City Trassa Dispetcheri</title>
+    <title>Yashil Yo'l - Dispetcher Boshqaruv Markazi</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Custom CSS -->
@@ -11,22 +11,49 @@
 </head>
 <body>
 
-    <!-- Professional HUD Boshqaruv Paneli -->
+    <!-- Dispetcher HUD Markazi -->
     <div class="hud-panel">
-        <h1>YASHIL YO'L <span>TRACER</span></h1>
-        <p>Toshkent Shahri Maxsus Trassa Tizimi</p>
+        <div class="hud-header">
+            <h1>TOSHKENT DISPATCH <span>HUD-1</span></h1>
+            <div class="live-dot"></div>
+        </div>
+        <p>Shahar Infratuzilmasi va Trassa Nazorati</p>
         
-        <div class="stat-row">Satelit Holati: <span id="sys-status">BARQAROR (4K)</span></div>
-        <div class="stat-row">Faol Transport: <span id="active-vehicle" style="color:#ff3333">103 - Tez Yordam</span></div>
-        <div class="stat-row">Svetofor Holati: <span id="light-mode" style="color:#ffcc00">TIRBANDLIK (5s qizil)</span></div>
-        <div class="stat-row">Trassa Holati: <span style="color:#00ff80">OCHIQ (GREEN WAVE)</span></div>
+        <!-- Xaritadagi obyektdan chaqiruv qismi -->
+        <div class="section-title">🚨 Tizimga Chaqiruv (Chorrahalar)</div>
+        <div class="selector-grid">
+            <button class="sel-btn active" onclick="selectIncident(0)">Amir Temur Chorrahasi (Probka)</button>
+            <button class="sel-btn" onclick="selectIncident(1)">Bunyodkor Ko'chasi (Avariya)</button>
+        </div>
 
-        <button class="action-btn" id="waveBtn">🚨 Green Wave Majburiy Ochish</button>
+        <!-- Dispetcher tanlaydigan maxsus transportlar -->
+        <div class="section-title" style="margin-top: 10px;">🚒 Maxsus Ekipajni Yo'llash</div>
+        <div class="selector-grid">
+            <button class="veh-btn active" onclick="selectVehicle(0)">🚑 103 Tez Yordam</button>
+            <button class="veh-btn" onclick="selectVehicle(1)">🚒 101 O't O'chirish</button>
+            <button class="veh-btn" onclick="selectVehicle(2)">🚓 YPX Patrul</button>
+            <button class="veh-btn" onclick="selectVehicle(3)">👑 VIP Kortej</button>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-row">Dispetcher Holati: <span id="sys-status">KUTILMOQDA</span></div>
+            <div class="stat-row">Svetofor: <span id="light-mode" style="color:#ff3333">🔴 Probka (Qizil)</span></div>
+            <div class="stat-row">Tezlik: <span id="speed-indicator" style="color:#00ffff">0 km/h</span></div>
+        </div>
+
+        <!-- Dispetcherning asosiy buyrug'i: Faqat bosganda yuradi! -->
+        <button class="action-btn" id="dispatchBtn">
+            <span>🚀 CHAQIRUVGA JO'NATISH (START)</span>
+        </button>
+
+        <button class="wave-btn" id="waveBtn">
+            <span>⚡ GREEN WAVE (PROBKANI OCHISH)</span>
+        </button>
         
-        <!-- Terminal Loglari -->
+        <!-- Dispetcher Xabarlar Jurnali -->
         <div class="terminal-box" id="terminalLog">
-            [00:01] Trassa xaritasi yuklandi...<br>
-            [00:02] Transport marshrutga chiqdi...
+            [10:15] Dispetcher tizimga kirdi.<br>
+            [10:15] Chaqiruv nuqtasini va transportni tanlang, so'ng "Jo'natish" tugmasini bosing.
         </div>
     </div>
 
