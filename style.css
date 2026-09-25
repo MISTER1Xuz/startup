@@ -1,190 +1,114 @@
-body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
     overflow: hidden;
-}
-
-body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    margin: 0;
-    padding: 0;
+    background: #02050e;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 #map {
-    background-color: #0b0f19 !important;
+    width: 100%;
+    height: 100%;
+    background: #02050e;
 }
 
+/* Sun'iy yo'ldosh tasvirini yanada kiberpank / neon ko'rinishga keltirish */
 .leaflet-tile-pane {
-    filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3);
+    filter: brightness(0.8) contrast(1.3) saturate(1.2);
 }
 
-.custom-marker {
-    background: transparent;
-    border: none;
+/* HUD Boshqaruv Paneli */
+.hud-panel {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    background: rgba(5, 15, 30, 0.85);
+    border: 1px solid rgba(0, 255, 128, 0.5);
+    padding: 20px;
+    border-radius: 14px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 30px rgba(0, 255, 128, 0.25);
+    color: #fff;
+    z-index: 1000;
+    max-width: 340px;
 }
 
-.action-card {
-    transition: all 0.2s ease;
-}
-
-.action-card:hover {
-    transform: translateY(-2px);
-}
-/* Map Styling - Custom Dark Matter */
-#map {
-    background: #0f172a !important;
-    /* Qorong'i xarita uchun maxsus filtr */
-    filter: hue-rotate(180deg) brightness(0.5) contrast(1.2); 
-}
-/* Agar CartoDB dark matter tiles ishlatsangiz, filtr shart emas, 
-   lekin bu filtr yanada "hackergarden" atmosferasini beradi */
-
-/* Glassmorphism effects */
-.glass-btn, .glass-card {
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-/* Custom Markers Styling */
-.custom-marker {
-    background: transparent;
-    border: none;
-}
-
-.vehicle-pulse {
-    width: 24px;
-    height: 24px;
-    background: #34d399; /* green-400 */
-    border-radius: 50%;
-    box-shadow: 0 0 0 0 rgba(52, 211, 153, 1);
-    position: relative;
-    animation: pulse-green 2s infinite;
-    border: 2px solid white;
-}
-
-.vehicle-pulse.emergency {
-    background: #f87171; /* red-400 */
-    box-shadow: 0 0 0 0 rgba(248, 113, 113, 1);
-    animation: pulse-red 1.5s infinite;
-}
-
-.vehicle-pulse.police {
-    background: #60a5fa; /* blue-400 */
-    box-shadow: 0 0 0 0 rgba(96, 165, 250, 1);
-    animation: pulse-blue 2s infinite;
-}
-
-@keyframes pulse-green {
-    0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
-}
-@keyframes pulse-red {
-    0% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.7); }
-    70% { box-shadow: 0 0 0 15px rgba(248, 113, 113, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); }
-}
-@keyframes pulse-blue {
-    0% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(96, 165, 250, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0); }
-}
-
-/* Traffic Light (Svetofor) Markers */
-.traffic-light-marker {
+.hud-panel h1 {
+    font-size: 18px;
+    color: #00ff80;
+    margin-bottom: 6px;
     display: flex;
-    justify-content: center;
     align-items: center;
-    background: none;
+    gap: 10px;
 }
-.traffic-light-icon {
-    width: 14px;
-    height: 14px;
+
+.hud-panel h1::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: #00ff80;
     border-radius: 50%;
-    border: 2px solid rgba(255,255,255);
+    box-shadow: 0 0 10px #00ff80;
+    animation: pulseGlow 1.5s infinite;
 }
-/* Traffic Light (Svetofor) Markers */
-.traffic-light-marker {
+
+.hud-panel p {
+    font-size: 12px;
+    color: #8fa3bf;
+    margin-bottom: 12px;
+}
+
+.stat-row {
+    font-size: 13px;
+    margin-bottom: 8px;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    background: none;
-}
-.traffic-light-icon {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.8);
-}
-/* Xaritani qorong'i va dizaynga mos qilish uchun filtr */
-.leaflet-tile-pane {
-    filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3);
-}
-body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    margin: 0;
-    padding: 0;
-}
-body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    margin: 0;
-    padding: 0;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 4px;
 }
 
-#map {
-    background-color: #0b0f19 !important;
+.stat-row span {
+    color: #00ff80;
+    font-weight: bold;
 }
 
-/* Xaritani qorong'i va dizaynga mos qilish uchun filtr */
-.leaflet-tile-pane {
-    filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3);
-}
-
-.custom-marker {
-    background: transparent;
+.action-btn {
+    width: 100%;
+    margin-top: 12px;
+    background: linear-gradient(135deg, #00ff80, #00b359);
     border: none;
+    padding: 12px;
+    color: #02050e;
+    font-weight: bold;
+    font-size: 13px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 0 15px rgba(0, 255, 128, 0.4);
 }
 
-/* Silliq hover va neon porlash animatsiyalari */
-.action-card {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
+.action-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 25px rgba(0, 255, 128, 0.8);
 }
 
-.action-card:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.2), 0 8px 10px -6px rgba(16, 185, 129, 0.2);
-}
-
-/* Status o'zgarish animatsiyasi (Qizildan Yashilga) */
 @keyframes pulseGlow {
-    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    0% { transform: scale(0.95); opacity: 0.8; }
+    50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 15px #00ff80; }
+    100% { transform: scale(0.95); opacity: 0.8; }
 }
 
-.emergency-active {
-    animation: pulseGlow 2s infinite;
-    border-color: #ef4444 !important;
-    background: rgba(127, 29, 29, 0.3) !important;
-}
-
-.corridor-active {
-    border-color: #10b981 !important;
-    background: rgba(6, 78, 59, 0.3) !important;
-    transition: all 0.5s ease;
-}
-
-#map {
-    background-color: #0b0f19 !important;
-}
-
-/* Xaritani qorong'i va dizaynga mos qilish uchun filtr */
-.leaflet-tile-pane {
-    filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3);
-}
-
-.custom-marker {
-    background: transparent;
-    border: none;
+/* Marker neon effektlari */
+.ambulance-marker {
+    background: rgba(255, 50, 50, 0.9);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 15px #ff3333, 0 0 30px #ff3333;
+    animation: pulseGlow 0.8s infinite;
 }
